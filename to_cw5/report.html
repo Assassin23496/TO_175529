@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">report.html</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">report.html</h1>
+    <p>Report generated on 17-Nov-2026 at 15:23:58 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.2.0</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="4">No results found. Check the filters.</td>
+        </tr>
+      </tbody>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="4">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left">&lt;</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">&gt;</div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">66 tests took 00:00:39.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled>
+            <span class="failed">0 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" >
+            <span class="passed">55 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" >
+            <span class="xfailed">11 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled>
+            <span class="rerun">0 Reruns</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="retried" disabled>
+            <span class="retried">0 Retried,</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th>Links</th>
+        </tr>
+      </thead>
+    </table>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.13.0&#34;, &#34;Platform&#34;: &#34;Windows-11-10.0.26300-SP0&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;9.1.1&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;cov&#34;: &#34;7.1.0&#34;, &#34;html&#34;: &#34;4.2.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;}}, &#34;tests&#34;: {&#34;test_calculator.py::test_calculator_results[100-False--kurier-0%-15.00 z\\u0142-115.00 z\\u0142]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_calculator_results[100-False--kurier-0%-15.00 z\\u0142-115.00 z\\u0142]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_calculator_results[100-False--kurier-0%-15.00 z\\u0142-115.00 z\\u0142]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_calculator.py::test_calculator_results[100-True--kurier-10%-0.00 z\\u0142-90.00 z\\u0142]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_calculator_results[100-True--kurier-10%-0.00 z\\u0142-90.00 z\\u0142]&#34;, &#34;duration&#34;: &#34;286 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_calculator_results[100-True--kurier-10%-0.00 z\\u0142-90.00 z\\u0142]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;286 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_calculator.py::test_calculator_results[100-False-STUDENT10-paczkomat-10%-10.00 z\\u0142-100.00 z\\u0142]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_calculator_results[100-False-STUDENT10-paczkomat-10%-10.00 z\\u0142-100.00 z\\u0142]&#34;, &#34;duration&#34;: &#34;253 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_calculator_results[100-False-STUDENT10-paczkomat-10%-10.00 z\\u0142-100.00 z\\u0142]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;253 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_calculator.py::test_calculator_results[150-True-student10-kurier-15%-0.00 z\\u0142-127.50 z\\u0142]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_calculator_results[150-True-student10-kurier-15%-0.00 z\\u0142-127.50 z\\u0142]&#34;, &#34;duration&#34;: &#34;819 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_calculator_results[150-True-student10-kurier-15%-0.00 z\\u0142-127.50 z\\u0142]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;819 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\namount = &amp;#x27;150&amp;#x27;, card = True, code = &amp;#x27;student10&amp;#x27;, shipping = &amp;#x27;kurier&amp;#x27;\ndiscount = &amp;#x27;15%&amp;#x27;, delivery = &amp;#x27;0.00 z\u0142&amp;#x27;, total = &amp;#x27;127.50 z\u0142&amp;#x27;\n\n    @pytest.mark.parametrize(\n        &amp;quot;amount,card,code,shipping,discount,delivery,total&amp;quot;,\n        [\n            (\n                &amp;quot;100&amp;quot;, False, &amp;quot;&amp;quot;, &amp;quot;kurier&amp;quot;,\n                &amp;quot;0%&amp;quot;, &amp;quot;15.00 z\u0142&amp;quot;, &amp;quot;115.00 z\u0142&amp;quot;\n            ),\n            (\n                &amp;quot;100&amp;quot;, True, &amp;quot;&amp;quot;, &amp;quot;kurier&amp;quot;,\n                &amp;quot;10%&amp;quot;, &amp;quot;0.00 z\u0142&amp;quot;, &amp;quot;90.00 z\u0142&amp;quot;\n            ),\n            (\n                &amp;quot;100&amp;quot;, False, &amp;quot;STUDENT10&amp;quot;, &amp;quot;paczkomat&amp;quot;,\n                &amp;quot;10%&amp;quot;, &amp;quot;10.00 z\u0142&amp;quot;, &amp;quot;100.00 z\u0142&amp;quot;\n            ),\n    \n            # DEF-06: Calculator gives 20% instead of 15%\n            pytest.param(\n                &amp;quot;150&amp;quot;, True, &amp;quot;student10&amp;quot;, &amp;quot;kurier&amp;quot;,\n                &amp;quot;15%&amp;quot;, &amp;quot;0.00 z\u0142&amp;quot;, &amp;quot;127.50 z\u0142&amp;quot;,\n                marks=pytest.mark.xfail(\n                    reason=&amp;quot;DEF-06: Calculator applies 20% instead of 15%&amp;quot;,\n                    strict=True\n                )\n            ),\n    \n            (\n                &amp;quot;200&amp;quot;, False, &amp;quot;&amp;quot;, &amp;quot;kurier&amp;quot;,\n                &amp;quot;0%&amp;quot;, &amp;quot;0.00 z\u0142&amp;quot;, &amp;quot;200.00 z\u0142&amp;quot;\n            ),\n            (\n                &amp;quot;199.99&amp;quot;, False, &amp;quot;&amp;quot;, &amp;quot;paczkomat&amp;quot;,\n                &amp;quot;0%&amp;quot;, &amp;quot;10.00 z\u0142&amp;quot;, &amp;quot;209.99 z\u0142&amp;quot;\n            ),\n            (\n                &amp;quot;100&amp;quot;, False, &amp;quot;&amp;quot;, &amp;quot;odbior&amp;quot;,\n                &amp;quot;0%&amp;quot;, &amp;quot;0.00 z\u0142&amp;quot;, &amp;quot;100.00 z\u0142&amp;quot;\n            ),\n    \n            # DEF-06: Same bug with spaces around discount code\n            pytest.param(\n                &amp;quot;150&amp;quot;, True, &amp;quot; STUDENT10 &amp;quot;, &amp;quot;kurier&amp;quot;,\n                &amp;quot;15%&amp;quot;, &amp;quot;0.00 z\u0142&amp;quot;, &amp;quot;127.50 z\u0142&amp;quot;,\n                marks=pytest.mark.xfail(\n                    reason=&amp;quot;DEF-06: Calculator applies 20% instead of 15%&amp;quot;,\n                    strict=True\n                )\n            ),\n        ]\n    )\n    def test_calculator_results(\n        driver, amount, card, code, shipping,\n        discount, delivery, total\n    ):\n        &amp;quot;&amp;quot;&amp;quot;REQ-KAL-03/05/06/07/08: Verify calculation rules.&amp;quot;&amp;quot;&amp;quot;\n        calculate(driver, amount, card, code, shipping)\n    \n        wait_for(driver, By.ID, &amp;quot;wynik&amp;quot;)\n    \n        actual_discount = driver.find_element(\n            By.ID, &amp;quot;rabat&amp;quot;\n        ).text\n    \n        actual_delivery = driver.find_element(\n            By.ID, &amp;quot;koszt-dostawy&amp;quot;\n        ).text\n    \n        actual_total = driver.find_element(\n            By.ID, &amp;quot;do-zaplaty&amp;quot;\n        ).text\n    \n&amp;gt;       assert actual_discount == discount\nE       AssertionError: assert &amp;#x27;20%&amp;#x27; == &amp;#x27;15%&amp;#x27;\nE         \nE         - 15%\nE         + 20%\n\ntest_calculator.py:109: AssertionError\n&#34;}], &#34;test_calculator.py::test_calculator_results[200-False--kurier-0%-0.00 z\\u0142-200.00 z\\u0142]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_calculator_results[200-False--kurier-0%-0.00 z\\u0142-200.00 z\\u0142]&#34;, &#34;duration&#34;: &#34;202 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_calculator_results[200-False--kurier-0%-0.00 z\\u0142-200.00 z\\u0142]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;202 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_calculator.py::test_calculator_results[199.99-False--paczkomat-0%-10.00 z\\u0142-209.99 z\\u0142]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_calculator_results[199.99-False--paczkomat-0%-10.00 z\\u0142-209.99 z\\u0142]&#34;, &#34;duration&#34;: &#34;201 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_calculator_results[199.99-False--paczkomat-0%-10.00 z\\u0142-209.99 z\\u0142]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;201 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_calculator.py::test_calculator_results[100-False--odbior-0%-0.00 z\\u0142-100.00 z\\u0142]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_calculator_results[100-False--odbior-0%-0.00 z\\u0142-100.00 z\\u0142]&#34;, &#34;duration&#34;: &#34;197 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_calculator_results[100-False--odbior-0%-0.00 z\\u0142-100.00 z\\u0142]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;197 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_calculator.py::test_calculator_results[150-True- STUDENT10 -kurier-15%-0.00 z\\u0142-127.50 z\\u0142]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_calculator_results[150-True- STUDENT10 -kurier-15%-0.00 z\\u0142-127.50 z\\u0142]&#34;, &#34;duration&#34;: &#34;266 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_calculator_results[150-True- STUDENT10 -kurier-15%-0.00 z\\u0142-127.50 z\\u0142]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;266 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\namount = &amp;#x27;150&amp;#x27;, card = True, code = &amp;#x27; STUDENT10 &amp;#x27;, shipping = &amp;#x27;kurier&amp;#x27;\ndiscount = &amp;#x27;15%&amp;#x27;, delivery = &amp;#x27;0.00 z\u0142&amp;#x27;, total = &amp;#x27;127.50 z\u0142&amp;#x27;\n\n    @pytest.mark.parametrize(\n        &amp;quot;amount,card,code,shipping,discount,delivery,total&amp;quot;,\n        [\n            (\n                &amp;quot;100&amp;quot;, False, &amp;quot;&amp;quot;, &amp;quot;kurier&amp;quot;,\n                &amp;quot;0%&amp;quot;, &amp;quot;15.00 z\u0142&amp;quot;, &amp;quot;115.00 z\u0142&amp;quot;\n            ),\n            (\n                &amp;quot;100&amp;quot;, True, &amp;quot;&amp;quot;, &amp;quot;kurier&amp;quot;,\n                &amp;quot;10%&amp;quot;, &amp;quot;0.00 z\u0142&amp;quot;, &amp;quot;90.00 z\u0142&amp;quot;\n            ),\n            (\n                &amp;quot;100&amp;quot;, False, &amp;quot;STUDENT10&amp;quot;, &amp;quot;paczkomat&amp;quot;,\n                &amp;quot;10%&amp;quot;, &amp;quot;10.00 z\u0142&amp;quot;, &amp;quot;100.00 z\u0142&amp;quot;\n            ),\n    \n            # DEF-06: Calculator gives 20% instead of 15%\n            pytest.param(\n                &amp;quot;150&amp;quot;, True, &amp;quot;student10&amp;quot;, &amp;quot;kurier&amp;quot;,\n                &amp;quot;15%&amp;quot;, &amp;quot;0.00 z\u0142&amp;quot;, &amp;quot;127.50 z\u0142&amp;quot;,\n                marks=pytest.mark.xfail(\n                    reason=&amp;quot;DEF-06: Calculator applies 20% instead of 15%&amp;quot;,\n                    strict=True\n                )\n            ),\n    \n            (\n                &amp;quot;200&amp;quot;, False, &amp;quot;&amp;quot;, &amp;quot;kurier&amp;quot;,\n                &amp;quot;0%&amp;quot;, &amp;quot;0.00 z\u0142&amp;quot;, &amp;quot;200.00 z\u0142&amp;quot;\n            ),\n            (\n                &amp;quot;199.99&amp;quot;, False, &amp;quot;&amp;quot;, &amp;quot;paczkomat&amp;quot;,\n                &amp;quot;0%&amp;quot;, &amp;quot;10.00 z\u0142&amp;quot;, &amp;quot;209.99 z\u0142&amp;quot;\n            ),\n            (\n                &amp;quot;100&amp;quot;, False, &amp;quot;&amp;quot;, &amp;quot;odbior&amp;quot;,\n                &amp;quot;0%&amp;quot;, &amp;quot;0.00 z\u0142&amp;quot;, &amp;quot;100.00 z\u0142&amp;quot;\n            ),\n    \n            # DEF-06: Same bug with spaces around discount code\n            pytest.param(\n                &amp;quot;150&amp;quot;, True, &amp;quot; STUDENT10 &amp;quot;, &amp;quot;kurier&amp;quot;,\n                &amp;quot;15%&amp;quot;, &amp;quot;0.00 z\u0142&amp;quot;, &amp;quot;127.50 z\u0142&amp;quot;,\n                marks=pytest.mark.xfail(\n                    reason=&amp;quot;DEF-06: Calculator applies 20% instead of 15%&amp;quot;,\n                    strict=True\n                )\n            ),\n        ]\n    )\n    def test_calculator_results(\n        driver, amount, card, code, shipping,\n        discount, delivery, total\n    ):\n        &amp;quot;&amp;quot;&amp;quot;REQ-KAL-03/05/06/07/08: Verify calculation rules.&amp;quot;&amp;quot;&amp;quot;\n        calculate(driver, amount, card, code, shipping)\n    \n        wait_for(driver, By.ID, &amp;quot;wynik&amp;quot;)\n    \n        actual_discount = driver.find_element(\n            By.ID, &amp;quot;rabat&amp;quot;\n        ).text\n    \n        actual_delivery = driver.find_element(\n            By.ID, &amp;quot;koszt-dostawy&amp;quot;\n        ).text\n    \n        actual_total = driver.find_element(\n            By.ID, &amp;quot;do-zaplaty&amp;quot;\n        ).text\n    \n&amp;gt;       assert actual_discount == discount\nE       AssertionError: assert &amp;#x27;20%&amp;#x27; == &amp;#x27;15%&amp;#x27;\nE         \nE         - 15%\nE         + 20%\n\ntest_calculator.py:109: AssertionError\n&#34;}], &#34;test_calculator.py::test_invalid_amount[0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_invalid_amount[0]&#34;, &#34;duration&#34;: &#34;222 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_invalid_amount[0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;222 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_calculator.py::test_invalid_amount[10000.01]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_invalid_amount[10000.01]&#34;, &#34;duration&#34;: &#34;181 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_invalid_amount[10000.01]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;181 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_calculator.py::test_invalid_amount[abc]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_invalid_amount[abc]&#34;, &#34;duration&#34;: &#34;180 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_invalid_amount[abc]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;180 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_calculator.py::test_invalid_amount[12.345]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_invalid_amount[12.345]&#34;, &#34;duration&#34;: &#34;684 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_invalid_amount[12.345]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;684 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_calculator.py::test_invalid_discount_code&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_calculator.py::test_invalid_discount_code&#34;, &#34;duration&#34;: &#34;260 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_calculator.py::test_invalid_discount_code&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;260 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_contact.py::test_valid_contact&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_contact.py::test_valid_contact&#34;, &#34;duration&#34;: &#34;567 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_contact.py::test_valid_contact&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;567 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_contact.py::test_empty_contact&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_contact.py::test_empty_contact&#34;, &#34;duration&#34;: &#34;420 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_contact.py::test_empty_contact&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;420 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_contact.py::test_contact_title&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_contact.py::test_contact_title&#34;, &#34;duration&#34;: &#34;46 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_contact.py::test_contact_title&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;46 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\n\n    @pytest.mark.xfail(\n        reason=&amp;quot;DEF-02: Contact page has an empty title&amp;quot;,\n        strict=True\n    )\n    \n    def test_contact_title(driver):\n        &amp;quot;&amp;quot;&amp;quot;REQ-UI-02: Contact page has a descriptive title.&amp;quot;&amp;quot;&amp;quot;\n        open_contact(driver)\n    \n&amp;gt;       assert driver.title == &amp;quot;SklepTO \u2013 kontakt&amp;quot;\nE       AssertionError: assert &amp;#x27;&amp;#x27; == &amp;#x27;SklepTO \u2013 kontakt&amp;#x27;\nE         \nE         - SklepTO \u2013 kontakt\n\ntest_contact.py:68: AssertionError\n&#34;}], &#34;test_contact.py::test_contact_image_alt&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_contact.py::test_contact_image_alt&#34;, &#34;duration&#34;: &#34;97 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_contact.py::test_contact_image_alt&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;97 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\n\n    @pytest.mark.xfail(\n        reason=&amp;quot;DEF-03: Contact image has no alternative text&amp;quot;,\n        strict=True\n    )\n    \n    def test_contact_image_alt(driver):\n        &amp;quot;&amp;quot;&amp;quot;REQ-UI-03: Every image has non-empty alt text.&amp;quot;&amp;quot;&amp;quot;\n        open_contact(driver)\n    \n        images = driver.find_elements(By.TAG_NAME, &amp;quot;img&amp;quot;)\n    \n        assert images, &amp;quot;No images found on contact page&amp;quot;\n    \n        for image in images:\n            alt = image.get_attribute(&amp;quot;alt&amp;quot;)\n&amp;gt;           assert alt is not None and alt.strip() != &amp;quot;&amp;quot;\nE           AssertionError: assert (&amp;#x27;&amp;#x27; is not None and &amp;#x27;&amp;#x27; != &amp;#x27;&amp;#x27;)\nE            +  where &amp;#x27;&amp;#x27; = &amp;lt;built-in method strip of str object at 0x00007FFA09F136C0&amp;gt;()\nE            +    where &amp;lt;built-in method strip of str object at 0x00007FFA09F136C0&amp;gt; = &amp;#x27;&amp;#x27;.strip\n\ntest_contact.py:86: AssertionError\n&#34;}], &#34;test_contact.py::test_contact_email_label&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_contact.py::test_contact_email_label&#34;, &#34;duration&#34;: &#34;43 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_contact.py::test_contact_email_label&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;43 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\n\n    @pytest.mark.xfail(\n        reason=&amp;quot;DEF-04: Email field has no associated label&amp;quot;,\n        strict=True\n    )\n    \n    def test_contact_email_label(driver):\n        &amp;quot;&amp;quot;&amp;quot;REQ-UI-04: Email field has a connected label.&amp;quot;&amp;quot;&amp;quot;\n        open_contact(driver)\n    \n        labels = driver.find_elements(\n            By.CSS_SELECTOR,\n            &amp;quot;label[for=&amp;#x27;email&amp;#x27;]&amp;quot;\n        )\n    \n&amp;gt;       assert len(labels) == 1\nE       assert 0 == 1\nE        +  where 0 = len([])\n\ntest_contact.py:103: AssertionError\n&#34;}], &#34;test_contact.py::test_contact_email_type&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_contact.py::test_contact_email_type&#34;, &#34;duration&#34;: &#34;47 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_contact.py::test_contact_email_type&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;47 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\n\n    @pytest.mark.xfail(\n        reason=&amp;quot;DEF-05: Email input uses type text instead of email&amp;quot;,\n        strict=True\n    )\n    \n    def test_contact_email_type(driver):\n        &amp;quot;&amp;quot;&amp;quot;REQ-UI-05: Email input must have type email.&amp;quot;&amp;quot;&amp;quot;\n        open_contact(driver)\n    \n        email = driver.find_element(By.ID, &amp;quot;email&amp;quot;)\n    \n&amp;gt;       assert email.get_attribute(&amp;quot;type&amp;quot;) == &amp;quot;email&amp;quot;\nE       AssertionError: assert &amp;#x27;text&amp;#x27; == &amp;#x27;email&amp;#x27;\nE         \nE         - email\nE         + text\n\ntest_contact.py:118: AssertionError\n&#34;}], &#34;test_login.py::test_valid_login&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_login.py::test_valid_login&#34;, &#34;duration&#34;: &#34;627 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_login.py::test_valid_login&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;627 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_login.py::test_invalid_login[jan-wrongpassword-B\\u0142\\u0119dny login lub has\\u0142o. Pozosta\\u0142o pr\\xf3b: 2.]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_login.py::test_invalid_login[jan-wrongpassword-B\\u0142\\u0119dny login lub has\\u0142o. Pozosta\\u0142o pr\\xf3b: 2.]&#34;, &#34;duration&#34;: &#34;545 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_login.py::test_invalid_login[jan-wrongpassword-B\\u0142\\u0119dny login lub has\\u0142o. Pozosta\\u0142o pr\\xf3b: 2.]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;545 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_login.py::test_invalid_login[unknown-Haslo123-B\\u0142\\u0119dny login lub has\\u0142o.]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_login.py::test_invalid_login[unknown-Haslo123-B\\u0142\\u0119dny login lub has\\u0142o.]&#34;, &#34;duration&#34;: &#34;493 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_login.py::test_invalid_login[unknown-Haslo123-B\\u0142\\u0119dny login lub has\\u0142o.]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;493 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_login.py::test_invalid_login[zablokowany-Haslo123-Konto jest zablokowane. Skontaktuj si\\u0119 z administratorem.]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_login.py::test_invalid_login[zablokowany-Haslo123-Konto jest zablokowane. Skontaktuj si\\u0119 z administratorem.]&#34;, &#34;duration&#34;: &#34;491 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_login.py::test_invalid_login[zablokowany-Haslo123-Konto jest zablokowane. Skontaktuj si\\u0119 z administratorem.]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;491 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_login.py::test_account_lockout&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_login.py::test_account_lockout&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_login.py::test_account_lockout&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_login.py::test_logout&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_login.py::test_logout&#34;, &#34;duration&#34;: &#34;684 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_login.py::test_logout&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;684 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_login.py::test_login_resets_failed_attempts&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_login.py::test_login_resets_failed_attempts&#34;, &#34;duration&#34;: &#34;847 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_login.py::test_login_resets_failed_attempts&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;847 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\nclean_db = None\n\n    @pytest.mark.xfail(\n        reason=&amp;quot;DEF-01: Failed attempts are not reset after successful login&amp;quot;,\n        strict=True\n    )\n    def test_login_resets_failed_attempts(driver, clean_db):\n        &amp;quot;&amp;quot;&amp;quot;REQ-LOG-02: Valid login resets failed attempts.&amp;quot;&amp;quot;&amp;quot;\n        log_in(driver, &amp;quot;jan&amp;quot;, &amp;quot;wrongpassword&amp;quot;)\n        log_in(driver, &amp;quot;jan&amp;quot;, &amp;quot;Haslo123&amp;quot;)\n    \n        open_page(\n            driver,\n            f&amp;quot;{SKLEPTO_URL}/admin.php&amp;quot;,\n            By.ID,\n            &amp;quot;uzytkownicy&amp;quot;\n        )\n    \n        row = driver.find_element(\n            By.CSS_SELECTOR,\n            &amp;quot;tr[data-login=&amp;#x27;jan&amp;#x27;]&amp;quot;\n        )\n    \n        attempts = row.find_element(\n            By.CSS_SELECTOR,\n            &amp;quot;td.proby&amp;quot;\n        )\n    \n&amp;gt;       assert attempts.text == &amp;quot;0&amp;quot;\nE       AssertionError: assert &amp;#x27;1&amp;#x27; == &amp;#x27;0&amp;#x27;\nE         \nE         - 0\nE         + 1\n\ntest_login.py:122: AssertionError\n&#34;}], &#34;test_orders.py::test_orders_require_login&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_orders_require_login&#34;, &#34;duration&#34;: &#34;97 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_orders_require_login&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;97 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_initial_orders&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_initial_orders&#34;, &#34;duration&#34;: &#34;706 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_initial_orders&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;706 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_available_actions[1-expected_actions0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_available_actions[1-expected_actions0]&#34;, &#34;duration&#34;: &#34;591 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_available_actions[1-expected_actions0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;591 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_available_actions[2-expected_actions1]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_available_actions[2-expected_actions1]&#34;, &#34;duration&#34;: &#34;598 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_available_actions[2-expected_actions1]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;598 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_available_actions[3-expected_actions2]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_available_actions[3-expected_actions2]&#34;, &#34;duration&#34;: &#34;642 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_available_actions[3-expected_actions2]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;642 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\nclean_db = None, order_id = 3, expected_actions = {&amp;#x27;akcja-dostarcz&amp;#x27;}\n\n    @pytest.mark.parametrize(\n        &amp;quot;order_id,expected_actions&amp;quot;,\n        [\n            (1, {&amp;quot;akcja-oplac&amp;quot;, &amp;quot;akcja-anuluj&amp;quot;}),\n            (2, {&amp;quot;akcja-wyslij&amp;quot;, &amp;quot;akcja-anuluj&amp;quot;}),\n    \n            # DEF-09: Shipped orders must not have a cancel button.\n            pytest.param(\n                3,\n                {&amp;quot;akcja-dostarcz&amp;quot;},\n                marks=pytest.mark.xfail(\n                    reason=(\n                        &amp;quot;DEF-09: Shipped order has &amp;quot;\n                        &amp;quot;a forbidden cancel action&amp;quot;\n                    ),\n                    strict=True\n                )\n            ),\n    \n            (4, set()),\n            (5, set()),\n        ]\n    )\n    def test_available_actions(\n        driver, clean_db, order_id, expected_actions\n    ):\n        &amp;quot;&amp;quot;&amp;quot;REQ-ZAM-05: Show only allowed order actions.&amp;quot;&amp;quot;&amp;quot;\n        login_as_jan(driver)\n    \n        row = get_order(driver, order_id)\n    \n        buttons = row.find_elements(\n            By.CSS_SELECTOR,\n            &amp;quot;td.akcje button&amp;quot;\n        )\n    \n        actual_actions = {\n            button.get_attribute(&amp;quot;class&amp;quot;).split()[0]\n            for button in buttons\n        }\n    \n&amp;gt;       assert actual_actions == expected_actions\nE       AssertionError: assert {&amp;#x27;akcja-anulu...cja-dostarcz&amp;#x27;} == {&amp;#x27;akcja-dostarcz&amp;#x27;}\nE         \nE         Extra items in the left set:\nE         &amp;#x27;akcja-anuluj&amp;#x27;\nE         Use -v to get more diff\n\ntest_orders.py:125: AssertionError\n&#34;}], &#34;test_orders.py::test_available_actions[4-expected_actions3]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_available_actions[4-expected_actions3]&#34;, &#34;duration&#34;: &#34;608 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_available_actions[4-expected_actions3]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;608 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_available_actions[5-expected_actions4]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_available_actions[5-expected_actions4]&#34;, &#34;duration&#34;: &#34;580 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_available_actions[5-expected_actions4]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;580 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_create_order&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_create_order&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_create_order&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_invalid_order_amount[0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_invalid_order_amount[0]&#34;, &#34;duration&#34;: &#34;777 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_invalid_order_amount[0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;777 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_invalid_order_amount[-10]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_invalid_order_amount[-10]&#34;, &#34;duration&#34;: &#34;719 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_invalid_order_amount[-10]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;719 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_invalid_order_amount[abc]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_invalid_order_amount[abc]&#34;, &#34;duration&#34;: &#34;735 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_invalid_order_amount[abc]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;735 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_valid_order_transition[1-oplac-NEW-PAID-Nowe-Op\\u0142acone]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_valid_order_transition[1-oplac-NEW-PAID-Nowe-Op\\u0142acone]&#34;, &#34;duration&#34;: &#34;726 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_valid_order_transition[1-oplac-NEW-PAID-Nowe-Op\\u0142acone]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;726 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_valid_order_transition[1-anuluj-NEW-CANCELLED-Nowe-Anulowane]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_valid_order_transition[1-anuluj-NEW-CANCELLED-Nowe-Anulowane]&#34;, &#34;duration&#34;: &#34;731 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_valid_order_transition[1-anuluj-NEW-CANCELLED-Nowe-Anulowane]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;731 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_valid_order_transition[2-wyslij-PAID-SHIPPED-Op\\u0142acone-Wys\\u0142ane]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_valid_order_transition[2-wyslij-PAID-SHIPPED-Op\\u0142acone-Wys\\u0142ane]&#34;, &#34;duration&#34;: &#34;691 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_valid_order_transition[2-wyslij-PAID-SHIPPED-Op\\u0142acone-Wys\\u0142ane]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;691 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_valid_order_transition[2-anuluj-PAID-CANCELLED-Op\\u0142acone-Anulowane]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_valid_order_transition[2-anuluj-PAID-CANCELLED-Op\\u0142acone-Anulowane]&#34;, &#34;duration&#34;: &#34;697 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_valid_order_transition[2-anuluj-PAID-CANCELLED-Op\\u0142acone-Anulowane]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;697 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_valid_order_transition[3-dostarcz-SHIPPED-DELIVERED-Wys\\u0142ane-Dostarczone]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_valid_order_transition[3-dostarcz-SHIPPED-DELIVERED-Wys\\u0142ane-Dostarczone]&#34;, &#34;duration&#34;: &#34;680 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_valid_order_transition[3-dostarcz-SHIPPED-DELIVERED-Wys\\u0142ane-Dostarczone]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;680 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_forbidden_transition[4-Dostarczone-DELIVERED]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_forbidden_transition[4-Dostarczone-DELIVERED]&#34;, &#34;duration&#34;: &#34;629 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_forbidden_transition[4-Dostarczone-DELIVERED]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;629 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_forbidden_transition[3-Wys\\u0142ane-SHIPPED]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_forbidden_transition[3-Wys\\u0142ane-SHIPPED]&#34;, &#34;duration&#34;: &#34;622 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_forbidden_transition[3-Wys\\u0142ane-SHIPPED]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;622 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\nclean_db = None, order_id = 3, status_label = &amp;#x27;Wys\u0142ane&amp;#x27;\nexpected_status = &amp;#x27;SHIPPED&amp;#x27;\n\n    @pytest.mark.parametrize(\n        &amp;quot;order_id,status_label,expected_status&amp;quot;,\n        [\n            (4, &amp;quot;Dostarczone&amp;quot;, &amp;quot;DELIVERED&amp;quot;),\n    \n            # DEF-09: Cancelling a shipped order must be rejected.\n            pytest.param(\n                3,\n                &amp;quot;Wys\u0142ane&amp;quot;,\n                &amp;quot;SHIPPED&amp;quot;,\n                marks=pytest.mark.xfail(\n                    reason=&amp;quot;DEF-09: Shipped order can be cancelled&amp;quot;,\n                    strict=True\n                )\n            ),\n        ]\n    )\n    def test_forbidden_transition(\n        driver, clean_db, order_id,\n        status_label, expected_status\n    ):\n        &amp;quot;&amp;quot;&amp;quot;REQ-ZAM-07: Reject forbidden status transitions.&amp;quot;&amp;quot;&amp;quot;\n        login_as_jan(driver)\n    \n        driver.get(\n            f&amp;quot;{SKLEPTO_URL}/akcja.php&amp;quot;\n            f&amp;quot;?id={order_id}&amp;amp;akcja=anuluj&amp;quot;\n        )\n    \n        message = wait_for(driver, By.ID, &amp;quot;flash&amp;quot;)\n    \n&amp;gt;       assert message.text == (\n            f&amp;quot;Niedozwolone przej\u015bcie: &amp;quot;\n            f&amp;quot;{status_label} \u2192 anuluj.&amp;quot;\n        )\nE       AssertionError: assert &amp;#x27;Zam\u00f3wienie #... \u2192 Anulowane.&amp;#x27; == &amp;#x27;Niedozwolone...ane \u2192 anuluj.&amp;#x27;\nE         \nE         - Niedozwolone przej\u015bcie: Wys\u0142ane \u2192 anuluj.\nE         + Zam\u00f3wienie #3: Wys\u0142ane \u2192 Anulowane.\n\ntest_orders.py:261: AssertionError\n&#34;}], &#34;test_orders.py::test_inaccessible_order[6]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_inaccessible_order[6]&#34;, &#34;duration&#34;: &#34;647 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_inaccessible_order[6]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;647 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_orders.py::test_inaccessible_order[999]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_orders.py::test_inaccessible_order[999]&#34;, &#34;duration&#34;: &#34;671 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_orders.py::test_inaccessible_order[999]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;671 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_registration_fields&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_registration_fields&#34;, &#34;duration&#34;: &#34;143 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_registration_fields&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;143 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_valid_registration&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_valid_registration&#34;, &#34;duration&#34;: &#34;964 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_valid_registration&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;964 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_invalid_login_format[Abcd]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_login_format[Abcd]&#34;, &#34;duration&#34;: &#34;668 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_login_format[Abcd]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;668 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\nclean_db = None, login = &amp;#x27;Abcd&amp;#x27;\n\n    @pytest.mark.parametrize(\n        &amp;quot;login&amp;quot;,\n        [\n            pytest.param(\n                &amp;quot;Abcd&amp;quot;,\n                marks=pytest.mark.xfail(\n                    reason=&amp;quot;DEF-07: Uppercase login is accepted&amp;quot;,\n                    strict=True\n                )\n            ),\n            &amp;quot;ab&amp;quot;,\n            &amp;quot;a&amp;quot; * 21,\n            &amp;quot;bad-login&amp;quot;\n        ]\n    )\n    \n    def test_invalid_login_format(driver, clean_db, login):\n        &amp;quot;&amp;quot;&amp;quot;REQ-REJ-02: Login must match lowercase rules.&amp;quot;&amp;quot;&amp;quot;\n        register(driver, login=login)\n    \n        errors = get_errors(driver)\n    \n&amp;gt;       assert errors.get(&amp;quot;login&amp;quot;) == (\n            &amp;quot;Login musi mie\u0107 od 3 do 20 znak\u00f3w &amp;quot;\n            &amp;quot;(ma\u0142e litery, cyfry, _).&amp;quot;\n        )\nE       AssertionError: assert None == &amp;#x27;Login musi mie\u0107 od 3 do 20 znak\u00f3w (ma\u0142e litery, cyfry, _).&amp;#x27;\nE        +  where None = &amp;lt;built-in method get of dict object at 0x00000269A7839DC0&amp;gt;(&amp;#x27;login&amp;#x27;)\nE        +    where &amp;lt;built-in method get of dict object at 0x00000269A7839DC0&amp;gt; = {}.get\n\ntest_registration.py:132: AssertionError\n&#34;}], &#34;test_registration.py::test_invalid_login_format[ab]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_login_format[ab]&#34;, &#34;duration&#34;: &#34;655 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_login_format[ab]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;655 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_invalid_login_format[aaaaaaaaaaaaaaaaaaaaa]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_login_format[aaaaaaaaaaaaaaaaaaaaa]&#34;, &#34;duration&#34;: &#34;636 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_login_format[aaaaaaaaaaaaaaaaaaaaa]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;636 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_invalid_login_format[bad-login]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_login_format[bad-login]&#34;, &#34;duration&#34;: &#34;665 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_login_format[bad-login]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;665 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_duplicate_login&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_duplicate_login&#34;, &#34;duration&#34;: &#34;659 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_duplicate_login&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;659 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_invalid_email&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_email&#34;, &#34;duration&#34;: &#34;648 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_email&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;648 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_invalid_age[17]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_age[17]&#34;, &#34;duration&#34;: &#34;692 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_age[17]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;692 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_invalid_age[100]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;XFailed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_age[100]&#34;, &#34;duration&#34;: &#34;682 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;XFailed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_age[100]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;682 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;driver = &amp;lt;selenium.webdriver.chrome.webdriver.WebDriver (session=&amp;quot;7c5c85fa5854bb57dfb721b5aa2b2da9&amp;quot;)&amp;gt;\nclean_db = None, age = &amp;#x27;100&amp;#x27;\n\n    @pytest.mark.parametrize(\n        &amp;quot;age&amp;quot;,\n        [\n            &amp;quot;17&amp;quot;,\n            pytest.param(\n                &amp;quot;100&amp;quot;,\n                marks=pytest.mark.xfail(\n                    reason=&amp;quot;DEF-08: Age 100 is incorrectly accepted&amp;quot;,\n                    strict=True\n                )\n            ),\n            &amp;quot;101&amp;quot;\n        ]\n    )\n    \n    def test_invalid_age(driver, clean_db, age):\n        &amp;quot;&amp;quot;&amp;quot;REQ-REJ-05: Age must be between 18 and 99.&amp;quot;&amp;quot;&amp;quot;\n        register(driver, age=age)\n    \n        errors = get_errors(driver)\n    \n&amp;gt;       assert errors.get(&amp;quot;wiek&amp;quot;) == (\n            &amp;quot;Wiek musi by\u0107 liczb\u0105 ca\u0142kowit\u0105 &amp;quot;\n            &amp;quot;z zakresu 18\u201399.&amp;quot;\n        )\nE       AssertionError: assert None == &amp;#x27;Wiek musi by\u0107 liczb\u0105 ca\u0142kowit\u0105 z zakresu 18\u201399.&amp;#x27;\nE        +  where None = &amp;lt;built-in method get of dict object at 0x00000269A7830280&amp;gt;(&amp;#x27;wiek&amp;#x27;)\nE        +    where &amp;lt;built-in method get of dict object at 0x00000269A7830280&amp;gt; = {}.get\n\ntest_registration.py:180: AssertionError\n&#34;}], &#34;test_registration.py::test_invalid_age[101]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_age[101]&#34;, &#34;duration&#34;: &#34;673 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_age[101]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;673 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_invalid_password[short1]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_password[short1]&#34;, &#34;duration&#34;: &#34;638 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_password[short1]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;638 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_invalid_password[onlyletters]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_password[onlyletters]&#34;, &#34;duration&#34;: &#34;643 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_password[onlyletters]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;643 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_invalid_password[1234567890]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_invalid_password[1234567890]&#34;, &#34;duration&#34;: &#34;673 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_invalid_password[1234567890]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;673 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_password_mismatch&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_password_mismatch&#34;, &#34;duration&#34;: &#34;634 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_password_mismatch&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;634 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_terms_required&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_terms_required&#34;, &#34;duration&#34;: &#34;652 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_terms_required&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;652 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_registration.py::test_all_errors_and_preserved_values&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_registration.py::test_all_errors_and_preserved_values&#34;, &#34;duration&#34;: &#34;675 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_registration.py::test_all_errors_and_preserved_values&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;675 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_ui.py::test_home_page&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_ui.py::test_home_page&#34;, &#34;duration&#34;: &#34;47 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_ui.py::test_home_page&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;47 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_ui.py::test_main_menu&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_ui.py::test_main_menu&#34;, &#34;duration&#34;: &#34;62 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_ui.py::test_main_menu&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;62 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;test_ui.py::test_footer&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;test_ui.py::test_footer&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;test_ui.py::test_footer&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;report.html&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+  </body>
+</html>
